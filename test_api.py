@@ -3,8 +3,10 @@ from typing import Dict
 import pytest
 
 from .app import app
-from .currencies import MXN, USD
-from .http_status import HTTPStatus
+from .currencies import USD
+
+
+HEADERS: Dict = {"Content-Type": "application/json"}
 
 
 @pytest.fixture
@@ -22,28 +24,27 @@ class TestFundWallet:
 
     def test_fund_wallet(self, client):
         data: Dict = {"currency": "USD", "amount": 1324}
-        response = client.post(self.url, data=data)
-        print("response", response)
-        assert response.json()["data"]["success"] == "true"
-        assert response.status_code == HTTPStatus.HTTP_201_CREATED
+        response = client.post(self.url, json=data, headers=HEADERS)
+        assert response.text == "Success"
+        assert response.status_code == 201
 
     def test_fund_wallet_unknown_currency(self, client):
         data: Dict = {"currency": "ALE", "amount": 1}
-        response = client.post(self.url, data=data)
-        assert response.json()["data"]["message"] == "Unknown currency"
-        assert response.status_code == HTTPStatus.HTTP_400_BAD_REQUEST
+        response = client.post(self.url, json=data, headers=HEADERS)
+        assert response.text == "Unknown currency"
+        assert response.status_code == 400
 
     def test_fund_wallet_negative_amount(self, client):
         data: Dict = {"currency": "USD", "amount": -1}
-        response = client.post(self.url, data=data)
-        assert response.json()["data"]["message"] == "Negative amount"
-        assert response.status_code == HTTPStatus.HTTP_400_BAD_REQUEST
+        response = client.post(self.url, json=data, headers=HEADERS)
+        assert response.text == "Negative amount"
+        assert response.status_code == 400
 
     def test_fund_wallet_invalid_amount(self, client):
         data: Dict = {"currency": "USD", "amount": "one hundred"}
-        response = client.post(self.url, data=data)
-        assert response.json()["data"]["message"] == "Invalid amount"
-        assert response.status_code == HTTPStatus.HTTP_400_BAD_REQUEST
+        response = client.post(self.url, json=data, headers=HEADERS)
+        assert response.text == "Invalid amount"
+        assert response.status_code == 400
 
 
 class TestConvertCurrency:
@@ -56,19 +57,19 @@ class TestConvertCurrency:
         print("response", response)
         assert response.json()["data"]["currency"] == "MXN"
         assert response.json()["data"]["amount"] == data.get("amount") * USD
-        assert response.status_code == HTTPStatus.HTTP_200_OK
+        assert response.status_code == 200
 
     def test_convert_currency_invalid_currency(self, client):
         data: Dict = {"from_currency": "MXN", "to_currency": "MONATO-COIN", "amount": 10}
         response = client.post(self.url, data=data)
         assert response.json()["data"]["message"] == "Negative amount"
-        assert response.status_code == HTTPStatus.HTTP_400_BAD_REQUEST
+        assert response.status_code == 400
 
     def test_convert_currency_negative_amount(self, client):
         data: Dict = {"from_currency": "USD", "to_currency": "MXN", "amount": -152}
         response = client.post(self.url, data=data)
         assert response.json()["data"]["message"] == "Negative amount"
-        assert response.status_code == HTTPStatus.HTTP_400_BAD_REQUEST
+        assert response.status_code == 400
 
 
 class TestWithdrawFunds:
@@ -84,20 +85,20 @@ class TestWithdrawFunds:
         response = client.post(self.url, data=data)
         print("response", response)
         assert response.json()["data"]["success"] == "true"
-        assert response.status_code == HTTPStatus.HTTP_200_OK
+        assert response.status_code == 200
 
     def test_withdraw_insufficient_funds(self, client):
         data: Dict = {"currency": "MXN", "amount": 950}
         response = client.post(self.url, data=data)
         assert response.json()["data"]["message"] == "Insufficient funds"
-        assert response.status_code == HTTPStatus.HTTP_400_BAD_REQUEST
+        assert response.status_code == 400
 
     def test_withdraw_user_without_funds(self, client):
         user_id: int = 2
         data: Dict = {"currency": "MXN", "amount": 950}
         response = client.post(f"/wallets/{user_id}/withdraw", data=data)
         assert response.json()["data"]["message"] == "Insufficient funds"
-        assert response.status_code == HTTPStatus.HTTP_400_BAD_REQUEST
+        assert response.status_code == 400
 
 
 class TestBalance:
@@ -119,11 +120,11 @@ class TestBalance:
         print("response", response)
         assert response.json()["data"]["MXN"] == amount_mxn
         assert response.json()["data"]["USD"] == amount_usd
-        assert response.status_code == HTTPStatus.HTTP_200_OK
+        assert response.status_code == 200
 
     def test_user_without_funds(self, client):
         user_id: int = 2
         data: Dict = {"currency": "MXN", "amount": 950}
         response = client.get(f"/wallets/{user_id}/balances")
         assert response.json()["data"] == {}
-        assert response.status_code == HTTPStatus.HTTP_200_OK
+        assert response.status_code == 200
