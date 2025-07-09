@@ -2,9 +2,9 @@ from typing import Dict
 
 import pytest
 
-from ..app import app
-from ..currencies import MXN, USD
-from ..http_status import HTTPStatus
+from .app import app
+from .currencies import MXN, USD
+from .http_status import HTTPStatus
 
 
 @pytest.fixture
