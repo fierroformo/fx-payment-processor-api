@@ -4,7 +4,6 @@ from app.app import wallet
 from app.http_status import HTTPStatus
 
 
-
 class TestFundWallet:
     user_id: int = 1
     url: str = f"/wallets/{user_id}/fund"
