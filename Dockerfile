@@ -6,6 +6,9 @@ WORKDIR /app
 # Copy project files into the container
 COPY . /app
 
+# Add envvar
+ENV PYTHONPATH=/app
+
 # Install dependencies
 RUN pip install -r requirements.txt
 
@@ -13,4 +16,4 @@ RUN pip install -r requirements.txt
 EXPOSE 5000
 
 # Command to run the app
-CMD ["python", "app.py"]
+CMD ["python", "-m", "app.app"]
