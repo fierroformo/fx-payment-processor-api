@@ -13,6 +13,9 @@ class TestBalance:
     def test_balances(self, client):
         amount_mxn: float = 666.50
         amount_usd: float = 152.0
+        #
+        # Fund account of user
+        #
         client.post(
             f"/wallets/{self.user_id}/fund",
             json={"currency": "MXN", "amount": amount_mxn}
@@ -21,6 +24,7 @@ class TestBalance:
             f"/wallets/{self.user_id}/fund",
             json={"currency": "USD", "amount": amount_usd}
         )
+
         response = client.get(self.url)
         assert response.json.get("MXN") == amount_mxn
         assert response.json.get("USD") == amount_usd

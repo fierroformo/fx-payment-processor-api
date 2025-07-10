@@ -2,6 +2,7 @@ from typing import Dict
 
 from app.app import wallet
 from app.http_status import HTTPStatus
+from app.messages import Messages
 
 
 class TestFundWallet:
@@ -21,17 +22,17 @@ class TestFundWallet:
     def test_fund_wallet_unknown_currency(self, client):
         data: Dict = {"currency": "ALE", "amount": 1}
         response = client.post(self.url, json=data)
-        assert response.text == "Unknown currency"
+        assert response.text == Messages.UNKNOWN_CURRENCY
         assert response.status_code == HTTPStatus.HTTP_400_BAD_REQUEST
 
     def test_fund_wallet_negative_amount(self, client):
         data: Dict = {"currency": "USD", "amount": -1}
         response = client.post(self.url, json=data)
-        assert response.text == "Negative amount"
+        assert response.text == Messages.NEGATIVE_AMOUNT
         assert response.status_code == HTTPStatus.HTTP_400_BAD_REQUEST
 
     def test_fund_wallet_invalid_amount(self, client):
         data: Dict = {"currency": "USD", "amount": "one hundred"}
         response = client.post(self.url, json=data)
-        assert response.text == "Invalid amount"
+        assert response.text == Messages.INVALID_AMOUNT
         assert response.status_code == HTTPStatus.HTTP_400_BAD_REQUEST
