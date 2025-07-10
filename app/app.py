@@ -52,6 +52,26 @@ def convert(_user_id: int):
     return result, HTTPStatus.HTTP_200_OK
 
 
+@app.route("/wallets/<int:user_id>/withdraw", methods=("POST",))
+def withdraw(user_id: int):
+    currency: str = request.get_json().get("currency")
+    amount: float = request.get_json().get("amount")
+
+    if not currency in AVAILABLE_CURRENCIES:
+        return "Unknown currency", HTTPStatus.HTTP_400_BAD_REQUEST
+    elif isinstance(amount, str):
+        return "Invalid amount", HTTPStatus.HTTP_400_BAD_REQUEST
+    elif amount < 0:
+        return "Negative amount", HTTPStatus.HTTP_400_BAD_REQUEST
+
+    if not user_id in wallet or amount > wallet[user_id][currency]:
+        return "Insufficient funds", HTTPStatus.HTTP_400_BAD_REQUEST
+
+    wallet[user_id][currency] -= amount
+
+    return "Success", HTTPStatus.HTTP_201_CREATED
+
+
 @app.route("/wallets/<int:user_id>/balances", methods=("GET",))
 def balances(user_id: int):
     return wallet.get(user_id, {}), HTTPStatus.HTTP_200_OK

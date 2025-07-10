@@ -2,7 +2,7 @@ from typing import Dict
 
 import pytest
 
-from app.app import app
+from app.app import app, wallet
 from app.currencies import USD
 from app.http_status import HTTPStatus
 
@@ -18,6 +18,10 @@ def client():
 class TestFundWallet:
     user_id: int = 1
     url: str = f"/wallets/{user_id}/fund"
+
+    @classmethod
+    def setup_class(cls):
+        wallet.clear()
 
     def test_fund_wallet(self, client):
         data: Dict = {"currency": "USD", "amount": 1324}
@@ -73,28 +77,33 @@ class TestWithdrawFunds:
     user_id: int = 1
     url: str = f"/wallets/{user_id}/withdraw"
 
+    @classmethod
+    def setup_class(cls):
+        wallet.clear()
+
     def test_withdraw_funds(self, client):
+        wallet.clear()
         #
         # Fund account of user
         #
-        client.post(f"/wallets/{self.user_id}/fund", data={"currency": "USD", "amount": 95})
-        data: Dict = {"currency": "MXN", "amount": 95}
-        response = client.post(self.url, data=data)
+        client.post(f"/wallets/{self.user_id}/fund", json={"currency": "USD", "amount": 95})
+        data: Dict = {"currency": "USD", "amount": 95}
+        response = client.post(self.url, json=data)
         print("response", response)
-        assert response.json()["data"]["success"] == "true"
+        assert response.text == "Success"
         assert response.status_code == HTTPStatus.HTTP_201_CREATED
 
     def test_withdraw_insufficient_funds(self, client):
         data: Dict = {"currency": "MXN", "amount": 950}
-        response = client.post(self.url, data=data)
-        assert response.json()["data"]["message"] == "Insufficient funds"
+        response = client.post(self.url, json=data)
+        assert response.text == "Insufficient funds"
         assert response.status_code == HTTPStatus.HTTP_400_BAD_REQUEST
 
     def test_withdraw_user_without_funds(self, client):
         user_id: int = 2
         data: Dict = {"currency": "MXN", "amount": 950}
-        response = client.post(f"/wallets/{user_id}/withdraw", data=data)
-        assert response.json()["data"]["message"] == "Insufficient funds"
+        response = client.post(f"/wallets/{user_id}/withdraw", json=data)
+        assert response.text == "Insufficient funds"
         assert response.status_code == HTTPStatus.HTTP_400_BAD_REQUEST
 
 
@@ -102,24 +111,28 @@ class TestBalance:
     user_id: int = 1
     url: str = f"/wallets/{user_id}/balances"
 
+    @classmethod
+    def setup_class(cls):
+        wallet.clear()
+
     def test_balances(self, client):
         amount_mxn: float = 666.50
         amount_usd: float = 152.0
         client.post(
             f"/wallets/{self.user_id}/fund",
-            data={"currency": "USD", "amount": amount_mxn}
+            json={"currency": "MXN", "amount": amount_mxn}
         )
         client.post(
             f"/wallets/{self.user_id}/fund",
-            data={"currency": "USD", "amount": amount_usd}
+            json={"currency": "USD", "amount": amount_usd}
         )
         response = client.get(self.url)
-        assert response.json()["data"]["MXN"] == amount_mxn
-        assert response.json()["data"]["USD"] == amount_usd
+        assert response.json.get("MXN") == amount_mxn
+        assert response.json.get("USD") == amount_usd
         assert response.status_code == HTTPStatus.HTTP_200_OK
 
-    def test_user_without_funds(self, client):
-        user_id: int = 2
+    def test_balances_user_empty_funds(self, client):
+        user_id: int = 11
         response = client.get(f"/wallets/{user_id}/balances")
-        assert response.json()["data"] == {}
+        assert response.json == {}
         assert response.status_code == HTTPStatus.HTTP_200_OK
