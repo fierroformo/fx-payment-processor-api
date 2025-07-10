@@ -54,11 +54,11 @@ Request
 }
 ```
 
-Response HTTP_200_OK
+Response HTTP_201_CREATED
 ```
 {
-  "amount": 0.742,
-  "currency": "USD"
+  "MXN": 261.8,
+  "USD": 0
 }
 ```
 

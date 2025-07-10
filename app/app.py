@@ -1,22 +1,21 @@
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, Optional, Tuple
 
 from flask import Flask, request
 
 from app.currencies import MXN, USD
 from app.http_status import HTTPStatus
-from app.validate import ValidateConvert, ValidateFunds
+from app.validate import ValidateConvert, ValidateFund, ValidateWithdraw
 
 
 app = Flask(__name__)
 wallet: Dict = {}
-AVAILABLE_CURRENCIES: List = ["MXN", "USD"]
 
 
 @app.route("/wallets/<int:user_id>/fund", methods=("POST",))
 def fund(user_id: int):
     currency: str = request.get_json().get("currency")
     amount: float = request.get_json().get("amount")
-    result: Optional[Tuple] = ValidateFunds.validate(currency, amount)
+    result: Optional[Tuple] = ValidateFund.validate(currency, amount)
 
     if result: return result
 
@@ -28,33 +27,36 @@ def fund(user_id: int):
     return "Success", HTTPStatus.HTTP_201_CREATED
 
 
-@app.route("/wallets/<int:_user_id>/convert", methods=("POST",))
-def convert(_user_id: int):
+@app.route("/wallets/<int:user_id>/convert", methods=("POST",))
+def convert(user_id: int):
     to_currency: str = request.get_json().get("to_currency")
     from_currency: str = request.get_json().get("from_currency")
     amount: float = request.get_json().get("amount")
-    result: Optional[Tuple] = ValidateConvert.validate(to_currency, from_currency, amount)
+    result: Optional[Tuple] = ValidateConvert.validate(
+        wallet[user_id], to_currency, from_currency, amount
+    )
 
     if result: return result
 
+    wallet[user_id][from_currency] -= amount
+    wallet[user_id][to_currency] += amount * USD if to_currency == "MXN" else amount * MXN
     result: Dict = {
         "currency": to_currency,
         "amount": amount * USD if to_currency == "MXN" else amount * MXN
     }
 
-    return result, HTTPStatus.HTTP_200_OK
+    return wallet[user_id], HTTPStatus.HTTP_201_CREATED
 
 
 @app.route("/wallets/<int:user_id>/withdraw", methods=("POST",))
 def withdraw(user_id: int):
     currency: str = request.get_json().get("currency")
     amount: float = request.get_json().get("amount")
-    result: Optional[Tuple] = ValidateFunds.validate(currency, amount)
+    result: Optional[Tuple] = ValidateWithdraw.validate(
+        wallet.get(user_id, {}), currency, amount
+    )
 
     if result: return result
-
-    if not user_id in wallet or amount > wallet[user_id][currency]:
-        return "Insufficient funds", HTTPStatus.HTTP_400_BAD_REQUEST
 
     wallet[user_id][currency] -= amount
 
