@@ -1,9 +1,10 @@
-from typing import Dict, List
+from typing import Dict, List, Optional, Tuple
 
 from flask import Flask, request
 
 from app.currencies import MXN, USD
 from app.http_status import HTTPStatus
+from app.validate import ValidateConvert, ValidateFunds
 
 
 app = Flask(__name__)
@@ -15,13 +16,9 @@ AVAILABLE_CURRENCIES: List = ["MXN", "USD"]
 def fund(user_id: int):
     currency: str = request.get_json().get("currency")
     amount: float = request.get_json().get("amount")
+    result: Optional[Tuple] = ValidateFunds.validate(currency, amount)
 
-    if not currency in AVAILABLE_CURRENCIES:
-        return "Unknown currency", HTTPStatus.HTTP_400_BAD_REQUEST
-    elif isinstance(amount, str):
-        return "Invalid amount", HTTPStatus.HTTP_400_BAD_REQUEST
-    elif amount < 0:
-        return "Negative amount", HTTPStatus.HTTP_400_BAD_REQUEST
+    if result: return result
 
     if not user_id in wallet:
         wallet[user_id] = {"MXN": 0, "USD": 0}
@@ -36,13 +33,9 @@ def convert(_user_id: int):
     to_currency: str = request.get_json().get("to_currency")
     from_currency: str = request.get_json().get("from_currency")
     amount: float = request.get_json().get("amount")
+    result: Optional[Tuple] = ValidateConvert.validate(to_currency, from_currency, amount)
 
-    if not to_currency in AVAILABLE_CURRENCIES or not from_currency in AVAILABLE_CURRENCIES:
-        return "Unknown currency", HTTPStatus.HTTP_400_BAD_REQUEST
-    elif isinstance(amount, str):
-        return "Invalid amount", HTTPStatus.HTTP_400_BAD_REQUEST
-    elif amount < 0:
-        return "Negative amount", HTTPStatus.HTTP_400_BAD_REQUEST
+    if result: return result
 
     result: Dict = {
         "currency": to_currency,
@@ -56,13 +49,9 @@ def convert(_user_id: int):
 def withdraw(user_id: int):
     currency: str = request.get_json().get("currency")
     amount: float = request.get_json().get("amount")
+    result: Optional[Tuple] = ValidateFunds.validate(currency, amount)
 
-    if not currency in AVAILABLE_CURRENCIES:
-        return "Unknown currency", HTTPStatus.HTTP_400_BAD_REQUEST
-    elif isinstance(amount, str):
-        return "Invalid amount", HTTPStatus.HTTP_400_BAD_REQUEST
-    elif amount < 0:
-        return "Negative amount", HTTPStatus.HTTP_400_BAD_REQUEST
+    if result: return result
 
     if not user_id in wallet or amount > wallet[user_id][currency]:
         return "Insufficient funds", HTTPStatus.HTTP_400_BAD_REQUEST

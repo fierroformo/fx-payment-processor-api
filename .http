@@ -1,0 +1,29 @@
+POST http://localhost:5000/wallets/2/fund
+Content-Type: application/json
+
+{
+    "currency": "USD",
+    "amount": 14
+}
+
+
+POST http://localhost:5000/wallets/2/convert
+Content-Type: application/json
+
+{
+    "to_currency": "USD",
+    "from_currency": "MXN",
+    "amount": 14
+}
+
+
+POST http://localhost:5000/wallets/2/withdraw
+Content-Type: application/json
+
+{
+    "currency": "USD",
+    "amount": 10
+}
+
+
+GET http://localhost:5000/wallets/2/balances
