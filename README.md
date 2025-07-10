@@ -12,22 +12,22 @@ git clone git@github.com:fierroformo/fx-payment-processor-api.git
 cd fx-payment-processor-api
 
 ### Build docker image
-docker build -t fx-payment-processor-api .
+`docker build -t fx-payment-processor-api .`
 
 
 ### Run docker container
-docker run -p 5000:5000 fx-payment-processor-api
+`docker run -p 5000:5000 fx-payment-processor-api`
 
 ### Test the flask app
 Open browser and visit [http://localhost:5000](http://localhost:5000)
 
 ## Run tests
-docker run fx-payment-processor-api pytest
+`docker run fx-payment-processor-api pytest`
 
 ## Endpoints
 
 ### Add funds
-POST http://localhost:5000/wallets/<user_id>/fund
+POST `http://localhost:5000/wallets/<user_id>/fund`
 
 Request
 ```
@@ -43,7 +43,7 @@ Success
 ```
 
 ### Convert
-POST http://localhost:5000/wallets/<user_id>/convert
+POST `http://localhost:5000/wallets/<user_id>/convert`
 
 Request
 ```
@@ -63,7 +63,7 @@ Response HTTP_200_OK
 ```
 
 ### Withdraw
-POST http://localhost:5000/wallets/<user_id>/withdraw
+POST `http://localhost:5000/wallets/<user_id>/withdraw`
 
 Request
 ```
@@ -79,7 +79,7 @@ Success
 ```
 
 ### Balances
-GET http://localhost:5000/wallets/<user_id>/balances
+GET `http://localhost:5000/wallets/<user_id>/balances`
 
 Response HTTP_200_OK
 ```
@@ -92,3 +92,4 @@ Response HTTP_200_OK
 ## Sample using Rest Client
 [Visual Studio Extension](https://marketplace.visualstudio.com/items?itemName=humao.rest-client)
 
+![](https://github.com/fierroformo/fx-payment-processor-api/blob/main/sample_requests.webm)
