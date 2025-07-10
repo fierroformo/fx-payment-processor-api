@@ -92,4 +92,4 @@ Response HTTP_200_OK
 ## Sample using Rest Client
 [Visual Studio Extension](https://marketplace.visualstudio.com/items?itemName=humao.rest-client)
 
-![](https://github.com/fierroformo/fx-payment-processor-api/blob/main/sample_requests.webm)
+[Video](https://github.com/fierroformo/fx-payment-processor-api/blob/main/sample_requests.webm)
