@@ -1,5 +1,6 @@
+from http import HTTPStatus
+
 from app.app import wallet
-from app.http_status import HTTPStatus
 
 
 class TestBalance:
@@ -28,10 +29,10 @@ class TestBalance:
         response = client.get(self.url)
         assert response.json.get("MXN") == amount_mxn
         assert response.json.get("USD") == amount_usd
-        assert response.status_code == HTTPStatus.HTTP_200_OK
+        assert response.status_code == HTTPStatus.OK
 
     def test_balances_user_empty_funds(self, client):
         user_id: int = 11
         response = client.get(f"/wallets/{user_id}/balances")
         assert response.json == {}
-        assert response.status_code == HTTPStatus.HTTP_200_OK
+        assert response.status_code == HTTPStatus.OK

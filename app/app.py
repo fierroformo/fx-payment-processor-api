@@ -1,9 +1,9 @@
+from http import HTTPStatus
 from typing import Dict, Optional, Tuple
 
 from flask import Flask, request
 
 from app.currencies import MXN, USD
-from app.http_status import HTTPStatus
 from app.validate import ValidateConvert, ValidateFund, ValidateWithdraw
 
 
@@ -24,7 +24,7 @@ def fund(user_id: int):
 
     wallet[user_id][currency] += amount
 
-    return "Success", HTTPStatus.HTTP_201_CREATED
+    return "Success", HTTPStatus.CREATED
 
 
 @app.route("/wallets/<int:user_id>/convert", methods=("POST",))
@@ -45,7 +45,7 @@ def convert(user_id: int):
         "amount": amount * USD if to_currency == "MXN" else amount * MXN
     }
 
-    return wallet[user_id], HTTPStatus.HTTP_201_CREATED
+    return wallet[user_id], HTTPStatus.CREATED
 
 
 @app.route("/wallets/<int:user_id>/withdraw", methods=("POST",))
@@ -60,12 +60,12 @@ def withdraw(user_id: int):
 
     wallet[user_id][currency] -= amount
 
-    return "Success", HTTPStatus.HTTP_201_CREATED
+    return "Success", HTTPStatus.CREATED
 
 
 @app.route("/wallets/<int:user_id>/balances", methods=("GET",))
 def balances(user_id: int):
-    return wallet.get(user_id, {}), HTTPStatus.HTTP_200_OK
+    return wallet.get(user_id, {}), HTTPStatus.OK
 
 
 if __name__ == "__main__":

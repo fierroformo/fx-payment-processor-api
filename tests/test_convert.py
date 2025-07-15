@@ -1,8 +1,8 @@
+from http import HTTPStatus
 from typing import Dict
 
 from app.app import wallet
 from app.currencies import USD
-from app.http_status import HTTPStatus
 from app.messages import Messages
 
 
@@ -27,22 +27,22 @@ class TestConvertCurrency:
         remaining_usd: float = data_wallet.get("amount") - data.get("amount")
         assert wallet[self.user_id]["MXN"] == expected_amount_mxn
         assert wallet[self.user_id]["USD"] == remaining_usd
-        assert response.status_code == HTTPStatus.HTTP_201_CREATED
+        assert response.status_code == HTTPStatus.CREATED
 
     def test_convert_without_funds(self, client):
         data: Dict = {"from_currency": "USD", "to_currency": "MXN", "amount": 5}
         response = client.post(self.url, json=data)
         assert response.text == Messages.INSUFFICIENT_FUNDS
-        assert response.status_code == HTTPStatus.HTTP_400_BAD_REQUEST
+        assert response.status_code == HTTPStatus.BAD_REQUEST
 
     def test_convert_currency_invalid_currency(self, client):
         data: Dict = {"from_currency": "MXN", "to_currency": "MONATO-COIN", "amount": 10}
         response = client.post(self.url, json=data)
         assert response.text == Messages.UNKNOWN_CURRENCY
-        assert response.status_code == HTTPStatus.HTTP_400_BAD_REQUEST
+        assert response.status_code == HTTPStatus.BAD_REQUEST
 
     def test_convert_currency_negative_amount(self, client):
         data: Dict = {"from_currency": "USD", "to_currency": "MXN", "amount": -152}
         response = client.post(self.url, json=data)
         assert response.text == Messages.NEGATIVE_AMOUNT
-        assert response.status_code == HTTPStatus.HTTP_400_BAD_REQUEST
+        assert response.status_code == HTTPStatus.BAD_REQUEST
