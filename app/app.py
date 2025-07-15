@@ -3,7 +3,7 @@ from typing import Dict, Optional, Tuple
 
 from flask import Flask, request
 
-from app.currencies import MXN, USD
+from app.currencies import AVAILABLE_CURRENCIES, MXN, USD
 from app.validate import ValidateConvert, ValidateFund, ValidateWithdraw
 
 
@@ -20,7 +20,7 @@ def fund(user_id: int):
     if result: return result
 
     if not user_id in wallet:
-        wallet[user_id] = {"MXN": 0, "USD": 0}
+        wallet[user_id] = {currency: 0 for currency in AVAILABLE_CURRENCIES}
 
     wallet[user_id][currency] += amount
 

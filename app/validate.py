@@ -1,10 +1,8 @@
 from typing import Dict, List, Optional, Tuple
 from http import HTTPStatus
 
+from app.currencies import AVAILABLE_CURRENCIES
 from app.messages import Messages
-
-
-AVAILABLE_CURRENCIES: List = ["MXN", "USD"]
 
 
 class ValidateFund:
